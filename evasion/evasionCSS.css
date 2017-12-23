@@ -1,0 +1,346 @@
+html {
+	font-size: 20px;
+	font-family: Helvetica, Consolas, Calibri, Arial, sans-serif;
+	color:#649;
+	background: linear-gradient(to right, #222, #649, #bad, #949, #222);
+}
+
+div#box {
+	border: 4px solid #96b;
+	border-left-width: 20px;
+	border-right-width: 20px;
+	border-radius: 6px;
+	padding: 0px;
+	margin: 0px auto 0px auto;
+	background-color: #aaa;
+	min-width: 1150px;
+	max-width: 1150px;
+	min-height: 1100px;
+}
+
+div#boxTitle {
+	font-size: 50px;
+	text-align: center;
+	border: 2px solid #649;
+	border-style: none none solid none;
+	border-radius: 1px;
+	padding: 25px;
+	margin: 0px;
+	background-color: #bad;
+	font-variant: small-caps;
+}
+
+div#container {
+	display: flex;
+	flex-direction: row;
+	margin: 20px;
+}
+
+div#arrBox {
+	float: left;
+	border: 2px solid #649;
+	border-radius: 5px;
+	padding: 15px;
+	margin: 5px 10px 10px 50px;
+	background-color: #ccc;
+	min-width: 250px;
+	max-width: 320px;
+	min-height: 100px;
+	max-height: 600px;
+}
+
+div#algBox {
+	float: left;
+	clear: left;
+	border: 2px solid #649;
+	border-radius: 5px;
+	padding: 15px;
+	margin: 5px 10px 10px 50px;
+	background-color: #ccc;
+	min-width: 250px;
+	max-width: 320px;
+	min-height: 100px;
+	max-height: 600px;
+}
+
+div#statBox {
+	float: left;
+	clear: left;
+	border: 2px solid #649;
+	border-radius: 5px;
+	padding: 10px;
+	margin: 5px 10px 10px 50px;
+	background-color: #ccc;
+	min-width: 250px;
+	max-width: 320px;
+	min-height: 100px;
+	max-height: 600px;
+}
+
+div#optionBox {
+	float: right;
+	clear: right;
+	border: 2px solid #649;
+	border-radius: 5px;
+	padding: 10px;
+	margin: 5px 50px 10px 10px;
+	background-color: #ccc;
+	min-width: 250px;
+	max-width: 320px;
+	min-height: 100px;
+	max-height: 600px;
+}
+
+div#statBar {
+	width: 100%;
+	height: 10px;
+	border: 2px solid #aaa;
+	border-radius: 3px;
+	background: #232;
+}
+
+
+div#canvBox {
+	border: 2px solid #649;
+	border-radius: 4px;
+	padding: 0px;
+	margin: 50px auto 5px auto;
+	background-color: #ccc;
+	width: 600px;
+	height: 600px;
+}
+
+#canvas {
+	border: 0px solid #ddd;
+	border-radius: 0px;
+	width: 100%;
+	height: 100%;
+}
+
+div#colorBtn {
+	background: linear-gradient(to right, black, red, orange, yellow, lime, cyan, blue, darkviolet, black);
+	margin: 5px 275px 5px 10px;
+	padding: 2px;
+	border: 1px solid #649;
+	border-radius: 5px;
+	float: right;
+	clear: left;
+	width: 264px;
+	height: 30px;
+}
+
+div#colorBtn input[type = button] {
+	background-color: #ccc;
+	border: 1.5px solid #649;
+	border-radius: 3px;
+	padding: 2px;
+	color: #222;
+	font-size: 18px;
+	vertical-align: middle;
+	text-align: center;
+	font-weight: bold;
+	transition: color 0.1s, box-shadow 0.1s, border 0.1s, background-color 0.1s, font-size 0.1s;
+	width: 100%;
+	height: 100%;
+	margin: 0px;
+}
+
+div#colorBtn input[type = button]:hover {
+	border: 1.5px solid #f69;
+	background-color: #fbc;
+	color: #624;
+}
+
+div#colorBtn input[type = button]:active {
+	border: 1px inset #f69;
+	background-color: #fbc;
+	box-shadow: 3px 3px 3px 0px #222 inset;
+	color: #c46;
+}
+
+div#colorMenu {
+	visibility: collapse;
+	background-color: #ccc;
+	border: 2px solid #649;
+	border-radius: 0px 0px 6px 6px;
+	margin: 2px 0px 0px 0px;
+	padding: 0px;
+	vertical-align: middle;
+	text-align: justify;
+	position: absolute;
+	z-index: 1;
+	width: 260px;
+	height: 370px;
+}
+
+div#colorMenu input {
+	border: 1px solid #649;
+	border-radius: 2px;
+	background-color: #ddd;
+	padding: 0px;
+	margin: 2px;
+	float: right;
+}
+
+div#colorMenu input:hover {
+	border-width: 1px;
+	border-color: #f69;
+}
+
+div#colorMenu input:focus {
+	border-width: 1px;
+	border-color: #f69;
+	background-color: #bad;
+	color: #222;
+}
+
+div#colorMenu input:active {
+	border: 1px inset #f69;
+	box-shadow: none;
+	background-color: #bad;
+	color: #222;
+}
+
+div.colorIn {
+	background-color: #bad;
+	border-left: 6px solid #649;
+	border-radius: 2px 4px 4px 2px;
+	margin: 5px 5px 5px 5px;
+	padding: 3px;
+	color: #222;
+	font-size: 16px;
+	vertical-align: middle;
+	text-align: justify;
+	height: 25px;
+}
+
+div.subtitle {
+	background-color: #bad;
+	border: 2px solid #649;
+	border-radius: 4px;
+	margin: 5px 0px 10px 0px;
+	padding: 5px;
+	color: #649;
+	font-size: 32px;
+	vertical-align: middle;
+	text-align: center;
+}
+
+div.param {
+	background-color: #bad;
+	border-left: 8px solid #649;
+	border-radius: 2px 5px 5px 2px;
+	margin: 10px 20px 10px 0px;
+	padding: 5px;
+	color: #222;
+	font-size: 16px;
+	vertical-align: middle;
+	text-align: justify;
+}
+
+select, input {
+	-moz-appearance: none;
+	-webkit-appearance: none;
+	appearance: none;
+	font-family: 'Trebuchet MS', sans-serif;
+}
+
+div.param select, div.param input[type = number] {
+	background-color: #ddd;
+	border: 2px solid #649;
+	border-radius: 2px;
+	margin: 0px;
+	padding: 4px;
+	color: #649;
+	font-size: 14px;
+}
+
+input.button {
+	width: 80%;
+	text-align: bottom;
+	max-width: 300px;
+	background-color: #ddd;
+	border: 2px outset #649;
+	border-radius: 5px;
+	margin: 5px 20px 5px 20px;
+	left: 10%;
+	padding: 2px;
+	color: #649;
+	font-size: 30px;
+	height: 48px;
+	transition: color 0.1s, box-shadow 0.1s, border 0.1s, background-color 0.1s, font-size 0.1s;
+}
+
+div.param select:hover, div.param input[type = number]:hover {
+	border-color: #f69;
+}
+
+div.param select:focus, div.param input[type = number]:focus {
+	border-color: #f69;
+	background-color: #fbc;
+	color: #222;
+}
+
+div.param input[type = radio] {
+	border: 2px solid #649;
+	border-radius: 50%;
+	transition: border 0.3s, background-color 0.3s;
+	width: 16px;
+	height: 16px;
+	background-color: #ddd;
+	vertical-align: middle;
+}
+
+div.param input[type = radio]:checked {
+	border-width: 8px;
+	background-color: #96b;
+	border-style: double;
+}
+
+div.param input[type = radio]:hover {
+	background-color: #fbc;
+	border-color: #f69;
+}
+
+div.param input[type = checkbox] {
+	border: 2px solid #649;
+	border-radius: 30%;
+	transition: border 0.3s, background-color 0.3s;
+	width: 16px;
+	height: 16px;
+	background-color: #ddd;
+	vertical-align: middle;
+}
+
+div.param input[type = checkbox]:checked {
+	border-width: 3px;
+	border-style: solid;
+	background-color: #96b;
+}
+
+div.param input[type = checkbox]:hover {
+	background-color: #fbc;
+	border-color: #f69;
+}
+
+input.button:hover {
+	border-style: solid;
+	border-color: #f69;
+	background-color: #fbc;
+	color: #624;
+}
+
+input.button:active {
+	border-style: inset;
+	border-color: #f69;
+	background-color: #fbc;
+	box-shadow: 3px 3px 3px 0px #222 inset;
+	color: #c46;
+	font-size: 28px;
+}
+
+.param select:disabled {
+	color: #444;
+	background-color: #888;
+	border-color: #aaa;
+}

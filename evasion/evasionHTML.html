@@ -1,0 +1,150 @@
+<!DOCTYPE HTML>
+
+<html>
+
+
+<head>
+	<title>Evasion learning</title>
+	<meta charset="UTF-8">
+	<link href="evasionCSS.css" rel="stylesheet" type="text/css">
+	<script src="evasionJS.js" defer="true"></script>
+</head>
+
+<body>
+
+	<div id="box">
+
+		<div id="boxTitle" class="ctr">Evasion learning</div>
+
+		
+
+		<div id="colorBtn">
+				<input type="button" onclick="colorsUpdate()" value="Color" />
+				<div id="colorMenu">
+					<div class="colorIn">
+						Background:
+						<input id="colorBG" type="color" value="#444444" />
+					</div>
+				
+					<div class="colorIn">
+						Bars:
+						<input id="colorBars" type="color" value="#dddddd" />
+					</div>
+					
+					<div class="colorIn">
+						Dots:
+						<input id="colorDots" type="color" value="#ff6699" />
+					</div>
+				</div>
+		</div>
+	
+		<div id="canvBox">
+			<canvas id="canvas" width="600" height="600"></canvas>
+		</div>
+	
+		<div id="container">
+			<div id="arrBox">
+				<div class="subtitle">
+					Array
+				</div>
+				
+				<div class="param">
+					Length X:
+					<input id="arrLenX" type="number" name="arrLenX" value="10" step="1" min="0" />
+				</div>
+				
+				<div class="param">
+					Length Y:
+					<input id="arrLenY" type="number" name="arrLenY" value="10" step="1" min="0" />
+				</div>
+				
+				<div class="param">
+					Alg num:
+					<input id="algLen" type="number" name="algLen" value="20" step="1" min="0" />
+				</div>
+
+				<input class="button" type="button" onclick="initGrid()" value="Ititialize" />
+			</div>
+			
+			<div id="algBox">
+				<div class="subtitle">
+					Algorithms
+				</div>
+				
+				<div class="param">
+					Delay(ms):
+					<input id="delay" type="number" name="delay" value="0" step="0.1" min="0" />
+				</div>
+				
+				<div class="param">
+					Alg index:
+					<input id="index" type="number" name="index" value="0" step="1" min="0" />
+				</div>
+				
+				<div class="param">
+					Limit:
+					<input id="limit" type="checkbox" name="limit" checked />
+				</div>
+				
+				<input class="button" type="button" onclick="toggle()" value="Start/Stop" />
+				
+				<input class="button" type="button" onclick="pause()" value="Pause" />
+				
+				<div class="param">
+					Run iter:
+					<input id="iterToRun" type="number" name="iterToRun" value="1" step="1" min="0" />
+				</div>
+				
+				<input class="button" type="button" onclick="quickAlg()" value="Run" />
+			</div>
+		
+			<div id="statBox">
+				<div class="subtitle">
+				Status
+				</div>
+			
+				<div id="statBar">
+				</div>
+			
+				<div id="status" class="param">
+				Idling
+				</div>
+				
+				<div id="iteration" class="param">
+				Iteration: 
+				</div>
+				
+				<div id="pass" class="param">
+				Pass: 
+				</div>
+				
+				<div id="score" class="param">
+				Score: 
+				</div>
+				
+				<div id="alg" class="param">
+				Alg: 
+				</div>
+			</div>
+		
+			<!--div id ="optionBox">
+				<div class="param">
+					Fast draw:
+					<input id="fastDraw" type="checkbox" name="fastDraw" checked />
+				</div>
+				
+				<div class="param">
+					Gamma:
+					<input id="cCorr" type="number" name="cCorr" value="2.2" step="0.01" min="0" />
+				</div>
+				<div class="param">
+					Noise:
+					<input id="noise2d" type="checkbox" name="noise2d" />
+				</div>
+			</div-->
+		</div>
+	</div>
+
+</body>
+
+</html>
