@@ -666,7 +666,12 @@ function quickAlg(n){
 	alg = 0;
 	
 	while (alg < algs.len && quickAlgOn){
-		while(!tick(true)){ticking = false;};
+		while(!tick(true)){
+			ticking = false;
+				if (algs.getIndex(alg, 'score') > SCOREMAX){
+					break;
+				}
+			}
 		if (!quickAlgOn){
 			break;
 		}
