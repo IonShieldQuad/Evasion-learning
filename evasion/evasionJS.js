@@ -23,11 +23,12 @@ var coreIndex;									//Horizontal position of core in array
 var limit = true; 								//Limit iteration number
 
 //Constants
-const INPUTN = 18;
+const INPUTN = 24;
 const OUTPUTN = 3;
-const SCANRAD = 4;
+const SCANRAD = 2;
 const PASSN = 20;
 const SCOREMAX = 100000;
+const CALCLAYERS = 1;
 
 //Styles
 var fStyle0 = '#444'; 		//Background
@@ -53,10 +54,13 @@ function colorsUpdate(){
 function Network(sample, rand, inLen, outLen){
 	this.input = [];
 	this.output = [];
-	this.linkP = [];
-	this.linkN = [];
+	//this.linkP = [];
+	//this.linkN = [];
+	this.nodes = [];
 	this.inLen = inLen;
 	this.outLen = outLen;
+	this.layersNum = CALCLAYERS + 2;
+	
 	if (sample == null || sample.iter == null){
 		this.iter = 0;
 	}
@@ -71,7 +75,7 @@ function Network(sample, rand, inLen, outLen){
 		this.output[j] = 0;
 	}
 	
-	for (let i = 0; i < this.inLen; i++){
+	/*for (let i = 0; i < this.inLen; i++){
 		this.linkP[i] = [];
 		this.linkN[i] = [];
 		for (let j = 0; j < this.outLen; j++){
@@ -81,14 +85,37 @@ function Network(sample, rand, inLen, outLen){
 			catch (e){
 				this.linkP[i][j] = 0;
 			}
-			this.linkP[i][j] += Math.random() * rand * (Math.round(Math.random()) * 2 - 1);
+			this.linkP[i][j] += Math.random() * (rand == null ? 0 : rand) * Math.randSign();
 			try {
 				this.linkN[i][j] = sample.linkN[i][j];
 			}
 			catch (e){
 				this.linkN[i][j] = 0 ;
 			}
-			this.linkN[i][j] += Math.random() * rand * (Math.round(Math.random()) * 2 - 1);
+			this.linkN[i][j] += Math.random() * (rand == null ? 0 : rand) * Math.randSign();
+		}
+	}*/
+	for (let i = 0; i < this.layersNum; i++){
+		this.nodes[i] = [];
+		for (let j = 0; j < (i === this.layersNum - 1 ? this.outLen : this.inLen); j++){
+			if (i === 0){
+				this.nodes[i][j] = new Node(sample == null ? null : sample.nodes[i][j], rand, i, 'input');
+			}
+			else if (i === this.layersNum - 1){
+				this.nodes[i][j] = new Node(sample == null ? null : sample.nodes[i][j], rand, i, 'output');
+			}
+			else {
+				this.nodes[i][j] = new Node(sample == null ? null : sample.nodes[i][j], rand, i, 'hidden');
+			}
+		}
+	}
+	for (let i = 0; i < this.nodes.length - 1; i++){
+		let lenI = this.nodes[i].length;
+		for (let j = 0; j < lenI; j++){
+			let lenI1 = this.nodes[i + 1].length;
+			for (let k = 0; k < lenI1; k++){
+				this.nodes[i][j].connectTo(this.nodes[i + 1][k], sample == null ? null : sample.nodes[i][j].outLink[k], rand);
+			}
 		}
 	}
 	
@@ -97,14 +124,14 @@ function Network(sample, rand, inLen, outLen){
 			
 			this.input[i] = (arr[i] == null ? 0 : arr[i]);
 		}
-	};
+	}
 	
-	this.process = function(){
+	/*this.process = function(){
 		for(let j = 0; j < outLen; j++){
-		this.output[j] = 0;
+			this.output[j] = 0;
 		}
 		for (let i = 0; i < this.inLen; i++){
-			for (var j = 0; j < this.outLen; j++){
+			for (let j = 0; j < this.outLen; j++){
 				if (this.input[i] >= 0){
 					this.output[j] += this.input[i] * this.linkP[i][j];
 				}
@@ -113,11 +140,29 @@ function Network(sample, rand, inLen, outLen){
 				}
 			}
 		}
-	};
+	};*/
+	
+	this.process = function(){
+		for (let i = 0; i < outLen; i++){
+			this.output[i] = 0;
+		}
+		for (let j = 0; j < inLen; j++){
+			this.nodes[0][j].setVal(this.input[j]);
+		}
+		for (let i = 0; i < this.nodes.length; i++){
+			let lenI = this.nodes[i].length;
+			for (let j = 0; j < lenI; j++){
+				this.nodes[i][j].calc();
+			}
+		}
+		for (let j = 0; j < outLen; j++){
+			this.output[j] = this.nodes[this.nodes.length - 1][j].getRes();
+		}
+	}
 	
 	this.getOutput = function(){
 		return this.output;
-	};
+	}
 	
 	this.getResult = function(){
 		var result = 0;
@@ -132,7 +177,7 @@ function Network(sample, rand, inLen, outLen){
 			}
 		}
 		return result;
-	};
+	}
 }
 
 //Algorithm data object
@@ -143,7 +188,7 @@ function AlgData(len){
 	
 	for (let i = 0; i < this.len; i++){
 		this.storage[i] = [];
-		this.storage[i][0] = new Network(null, 0, INPUTN, OUTPUTN);
+		this.storage[i][0] = new Network(null, i, INPUTN, OUTPUTN);
 		this.storage[i][1] = 0;
 		this.storage[i][2] = 0;
 	}
@@ -214,6 +259,96 @@ function AlgData(len){
 	}
 }
 
+//Node object
+function Node(sample, rand, layer, type){
+	this.layer = layer;
+	this.type = type;
+	this.inLink = [];
+	this.outLink = [];
+	this.val = 0;
+	this.res = 0;
+	
+	switch (this.type){
+		case 'output':
+		case 'hidden':
+		try{
+			this.bias = sample.bias;
+		}
+		catch (e){
+			this.bias = 0;
+		}
+		this.bias += Math.random() * (rand == null ? 0 : rand) * Math.randSign();
+		break;
+		
+		default:
+		this.bias = 0;
+	}
+	
+	this.connectTo = function(node, sample, rand){
+		var link = new Link(sample, rand);
+		this.outLink[this.outLink.length] = link;
+		node.inLink[node.inLink.length] = link;
+	}
+	
+	this.setVal = function(val){
+		this.val = (val == null ? 0 : val);
+	}
+	
+	this.getRes = function(){
+		return this.res;
+	}
+	
+	this.calc = function(){
+		switch (this.type){
+			case 'hidden':
+			this.val = this.bias;
+			for (let link of this.inLink){
+				this.val += link.getOutput();
+			}
+			this.res = (Math.random() < sigmoid(this.val) ? 1 : 0);
+			for (let link of this.outLink){
+				link.setInput(this.res);
+			}
+			break;
+			
+			case 'input':
+			this.res = this.val;
+			for (let link of this.outLink){
+				link.setInput(this.res);
+			}
+			break;
+			
+			case 'output':
+			this.val = this.bias;
+			for (let link of this.inLink){
+				this.val += link.getOutput();
+			}
+			this.res = this.val;
+			break;
+		}
+	}
+}
+
+//Connection object
+function Link (sample, rand){
+	this.input = 0;
+	try{
+		this.weight = sample.weight;
+	}
+	catch (e){
+		this.weight = 0;
+	}
+	this.weight += Math.random() * (rand == null ? 0 : rand) * Math.randSign();
+	
+	this.setInput = function (val){
+		this.input = (val == null ? 0 : val);
+	}
+	
+	this.getOutput = function(){
+		return this.input * this.weight;
+	}
+}
+
 //Grid cell
 function Cell(){
 	this.type = 'empty';
@@ -230,6 +365,11 @@ function Cell(){
 			this.type = null;
 		}
 	}
+}
+
+//Sigmoid function
+function sigmoid(x){
+	return (1 / (1 + Math.exp(-x)));
 }
 
 //Updates status box
@@ -306,6 +446,11 @@ function getRandomInt(min, max){
 //Gets random int from range
 function getRandomFloat(min, max){
     return (Math.random() * (max - min)) + min;
+}
+
+//Gets random sign
+Math.randSign = function(){
+	return (Math.round(Math.random()) * 2 - 1);
 }
 
 //Clamps input between 2 values
@@ -418,11 +563,64 @@ function update(){
 	var size = [canvas.width, canvas.height];
 	var d = [size[0] / arrLen[0], size[1] / arrLen[1]];
 	var ctx = canvas.getContext('2d');
+	var adj = {};
 	
-	ctx.clearRect(0, 0, size[0], size[1]); //Clears canvas
+	ctx.strokeStyle = 'rgba(0, 0, 0, 0)';
+	
+	ctx.fillStyle = fStyle0;
+	ctx.fillRect(0, 0, size[0], size[1]); //Clears canvas
 	
 	for (let i = 0; i < arrLen[0]; i++){ //Draws a cell
 		for (let j = 0; j < arrLen[1]; j++){
+			adj = {};
+			try {
+				adj.l = mainArr[Math.wrap(i - 1, arrLen[0])][j].type;
+			}
+			catch (e){
+				adj.l = null;
+			}
+			try {
+				adj.r = mainArr[Math.wrap(i + 1, arrLen[0])][j].type;
+			}
+			catch (e){
+				adj.r = null;
+			}
+			try {
+				adj.t = mainArr[Math.wrap(i, arrLen[0])][j + 1].type;
+			}
+			catch (e){
+				adj.t = null;
+			}
+			try {
+				adj.b = mainArr[Math.wrap(i, arrLen[0])][j - 1].type;
+			}
+			catch (e){
+				adj.b = null;
+			}
+			try {
+				adj.lt = mainArr[Math.wrap(i - 1, arrLen[0])][j + 1].type;
+			}
+			catch (e){
+				adj.lt = null;
+			}
+			try {
+				adj.lb = mainArr[Math.wrap(i - 1, arrLen[0])][j - 1].type;
+			}
+			catch (e){
+				adj.lb = null;
+			}
+			try {
+				adj.rt = mainArr[Math.wrap(i + 1, arrLen[0])][j + 1].type;
+			}
+			catch (e){
+				adj.rt = null;
+			}
+			try {
+				adj.rb = mainArr[Math.wrap(i + 1, arrLen[0])][j - 1].type;
+			}
+			catch (e){
+				adj.rb = null;
+			}
 			switch(mainArr[i][j].type){
 				case 'empty':
 				ctx.fillStyle = fStyle0;
@@ -430,16 +628,143 @@ function update(){
 				
 				case 'wall':
 				ctx.fillStyle = fStyle1;
+				ctx.beginPath();
+				ctx.ellipse(i * d[0] + d[0] / 2, size[1] - (j * d[1] + d[1] / 2), d[0] / 2, d[1] / 2, 0, 0, 2 * Math.PI);
+				ctx.stroke();
+				ctx.fill();
+				if (adj.l === 'wall'){
+					ctx.fillRect(i * d[0], size[1] - (j * d[1]), d[0] / 2, - d[1]);
+				}
+				if (adj.r === 'wall'){
+					ctx.fillRect(i * d[0] + d[0] / 2, size[1] - (j * d[1]), d[0] / 2, - d[1]);
+				}
+				if (adj.t === 'wall'){
+					ctx.fillRect(i * d[0], size[1] - (j * d[1] + d[1] / 2), d[0], - d[1] / 2);
+				}
+				if (adj.b === 'wall'){
+					ctx.fillRect(i * d[0], size[1] - (j * d[1]), d[0], - d[1] / 2);
+				}
+				if (adj.lt === 'wall'){
+					let data0 = ctx.getImageData(i * d[0] - d[0] / 2, size[1] - (j * d[1] + d[1] / 2), 1, 1).data;
+					let data1 = ctx.getImageData(i * d[0] + d[0] / 2 - 1, size[1] - (j * d[1] + d[1] * 1.5 - 1), 1, 1).data;
+					
+					ctx.fillRect(i * d[0], size[1] - (j * d[1] + d[1] / 2), d[0] / 2, - d[1] / 2);
+					
+					ctx.fillRect(i * d[0] - d[0] / 2, size[1] - (j * d[1] + d[1] / 2), d[0] / 2, - d[1] / 2);
+					ctx.fillRect(i * d[0], size[1] - (j * d[1] + d[1]), d[0] / 2, - d[1] / 2);
+					
+					ctx.fillStyle = `rgba(${data0[0]}, ${data0[1]}, ${data0[2]}, ${data0[3] / 255})`;
+					
+					ctx.beginPath();
+					ctx.ellipse(i * d[0] - d[0] / 2, size[1] - (j * d[1] + d[1] / 2), d[0] / 2, d[1] / 2, 0, - 0.5 * Math.PI, 0);
+					ctx.lineTo(i * d[0] - d[0] / 2, size[1] - (j * d[1] + d[1] / 2));
+					ctx.stroke();
+					ctx.fill();
+					
+					ctx.fillStyle = `rgba(${data1[0]}, ${data1[1]}, ${data1[2]}, ${data1[3] / 255})`;
+					
+					ctx.beginPath();
+					ctx.ellipse(i * d[0] + d[0] / 2, size[1] - (j * d[1] + d[1] * 1.5), d[0] / 2, d[1] / 2, 0, 0.5 * Math.PI, Math.PI);
+					ctx.lineTo(i * d[0] + d[0] / 2, size[1] - (j * d[1] + d[1] * 1.5));
+					ctx.stroke();
+					ctx.fill();
+					
+					ctx.fillStyle = fStyle1;
+				}
+				if (adj.lb === 'wall'){
+					let data0 = ctx.getImageData(i * d[0] - d[0] / 2, size[1] - (j * d[1] + d[1] / 2 - 1), 1, 1).data;
+					let data1 = ctx.getImageData(i * d[0] + d[0] / 2 - 1, size[1] - (j * d[1] - d[1] / 2), 1, 1).data;
+					
+					ctx.fillRect(i * d[0], size[1] - (j * d[1]), d[0] / 2, - d[1] / 2);
+					
+					ctx.fillRect(i * d[0] - d[0] / 2, size[1] - (j * d[1]), d[0] / 2, - d[1] / 2);
+					ctx.fillRect(i * d[0], size[1] - (j * d[1] - d[1] / 2), d[0] / 2, - d[1] / 2);
+					
+					ctx.fillStyle = `rgba(${data0[0]}, ${data0[1]}, ${data0[2]}, ${data0[3] / 255})`;
+					
+					ctx.beginPath();
+					ctx.ellipse(i * d[0] - d[0] / 2, size[1] - (j * d[1] + d[1] / 2), d[0] / 2, d[1] / 2, 0, 0, 0.5 * Math.PI);
+					ctx.lineTo(i * d[0] - d[0] / 2, size[1] - (j * d[1] + d[1] / 2));
+					ctx.stroke();
+					ctx.fill();
+					
+					ctx.fillStyle = `rgba(${data1[0]}, ${data1[1]}, ${data1[2]}, ${data1[3] / 255})`;
+					
+					ctx.beginPath();
+					ctx.ellipse(i * d[0] + d[0] / 2, size[1] - (j * d[1] - d[1] / 2), d[0] / 2, d[1] / 2, 0, Math.PI, 1.5 * Math.PI);
+					ctx.lineTo(i * d[0] + d[0] / 2, size[1] - (j * d[1] - d[1] / 2));
+					ctx.stroke();
+					ctx.fill();
+					
+					ctx.fillStyle = fStyle1;
+				}
+				if (adj.rt === 'wall'){
+					let data0 = ctx.getImageData(i * d[0] + d[0] / 2, size[1] - (j * d[1] + d[1] * 1.5 - 1), 1, 1).data;
+					let data1 = ctx.getImageData(i * d[0] + d[0] * 1.5 - 1, size[1] - (j * d[1] + d[1] / 2), 1, 1).data;
+					
+					ctx.fillRect(i * d[0] + d[0] / 2, size[1] - (j * d[1] + d[1] / 2), d[0] / 2, - d[1] / 2);
+					
+					ctx.fillRect(i * d[0] + d[0] / 2, size[1] - (j * d[1] + d[1]), d[0] / 2, - d[1] / 2);
+					ctx.fillRect(i * d[0] + d[0], size[1] - (j * d[1] + d[1] / 2), d[0] / 2, - d[1] / 2);
+					
+					ctx.fillStyle = `rgba(${data0[0]}, ${data0[1]}, ${data0[2]}, ${data0[3] / 255})`;
+					
+					ctx.beginPath();
+					ctx.ellipse(i * d[0] + d[0] / 2, size[1] - (j * d[1] + d[1] * 1.5), d[0] / 2, d[1] / 2, 0, 0, 0.5 * Math.PI);
+					ctx.lineTo(i * d[0] + d[0] / 2, size[1] - (j * d[1] + d[1] * 1.5));
+					ctx.stroke();
+					ctx.fill();
+					
+					ctx.fillStyle = `rgba(${data1[0]}, ${data1[1]}, ${data1[2]}, ${data1[3] / 255})`;
+					
+					ctx.beginPath();
+					ctx.ellipse(i * d[0] + d[0] * 1.5, size[1] - (j * d[1] + d[1] / 2), d[0] / 2, d[1] / 2, 0, Math.PI, 1.5 * Math.PI);
+					ctx.lineTo(i * d[0] + d[0] * 1.5, size[1] - (j * d[1] + d[1] / 2));
+					ctx.stroke();
+					ctx.fill();
+					
+					ctx.fillStyle = fStyle1;
+				}
+				if (adj.rb === 'wall'){
+					let data0 = ctx.getImageData(i * d[0] + d[0] / 2, size[1] - (j * d[1] - d[1] / 2), 1, 1).data;
+					let data1 = ctx.getImageData(i * d[0] + d[0] * 1.5 - 1, size[1] - (j * d[1] + d[1] / 2 - 1), 1, 1).data;
+					
+					ctx.fillRect(i * d[0] + d[0] / 2, size[1] - (j * d[1]), d[0] / 2, - d[1] / 2);
+					
+					ctx.fillRect(i * d[0] + d[0] / 2, size[1] - (j * d[1] - d[1] / 2), d[0] / 2, - d[1] / 2);
+					ctx.fillRect(i * d[0] + d[0], size[1] - (j * d[1]), d[0] / 2, - d[1] / 2);
+					
+					ctx.fillStyle = `rgba(${data0[0]}, ${data0[1]}, ${data0[2]}, ${data0[3] / 255})`;
+					
+					ctx.beginPath();
+					ctx.ellipse(i * d[0] + d[0] / 2, size[1] - (j * d[1] - d[1] / 2), d[0] / 2, d[1] / 2, 0, - 0.5 * Math.PI, 0);
+					ctx.lineTo(i * d[0] + d[0] / 2, size[1] - (j * d[1] - d[1] / 2));
+					ctx.stroke();
+					ctx.fill();
+					
+					ctx.fillStyle = `rgba(${data1[0]}, ${data1[1]}, ${data1[2]}, ${data1[3] / 255})`;
+					
+					ctx.beginPath();
+					ctx.ellipse(i * d[0] + d[0] * 1.5, size[1] - (j * d[1] + d[1] / 2), d[0] / 2, d[1] / 2, 0, 0.5 * Math.PI, Math.PI);
+					ctx.lineTo(i * d[0] + d[0] * 1.5, size[1] - (j * d[1] + d[1] / 2));
+					ctx.stroke();
+					ctx.fill();
+					
+					ctx.fillStyle = fStyle1;
+				}
 				break;
 				
 				case 'core':
 				ctx.fillStyle = fStyle2;
+				ctx.beginPath();
+				ctx.ellipse(i * d[0] + d[0] / 2, size[1] - (j * d[1] + d[1] / 2), d[0] / 2, d[1] / 2, 0, 0, 2 * Math.PI);
+				ctx.stroke();
+				ctx.fill();
 				break;
 				
 				default:
 				continue;
 			}
-			ctx.fillRect(i * d[0], size[1] - (j * d[1]), d[0], - d[1]);
 		}
 	}
 }
@@ -483,14 +808,15 @@ function tick(q){
 		var newLine = [];
 		var newLen;
 		var input = [];
-		var scanRad;
+		var scanRad = [];
 		
 		if (q && !quickAlgOn){
 			next = true;
 		}
 		
-		scanRad = Math.clamp(SCANRAD, 0, arrLen[1]);
-		for (let i0 = -scanRad; i0 <= scanRad; i0++)
+		scanRad[0] = Math.clamp(SCANRAD, 0, Math.floor((arrLen[0] - 1) / 2));
+		scanRad[1] = Math.clamp(SCANRAD, 0, Math.floor((arrLen[1] - 1) / 2));
+		/*for (let i0 = -scanRad; i0 <= scanRad; i0++)
 		{
 			var wallDist = -1;
 			for (let j = 0; j < arrLen[1]; j++){
@@ -512,6 +838,19 @@ function tick(q){
 				}
 			}
 			input[input.length] = wallFound;
+		}*/
+		for (let i0 = -scanRad[0]; i0 <= scanRad[0]; i0++){
+			for (let j = 0; j <=  2 * scanRad[1]; j++){
+				switch (mainArr[Math.wrap(coreIndex + i0, arrLen[0])][j].type){
+					case 'empty':
+					input[input.length] = 0;
+					break;
+					
+					case 'wall':
+					input[input.length] = 1;
+					break;
+				}
+			}
 		}
 		
 		result = algs.runAlg(alg, input);
@@ -656,8 +995,8 @@ function quickAlg(n){
 		quickAlgOn = !quickAlgOn;
 		currStat = 3;
 		updateStat(3);
-		var n0 = Math.clamp(document.getElementById('iterToRun').value - 1, 0, 1000);
-		document.getElementById('iterToRun').value = n0 + 1;
+		var n0 = Math.clamp(document.getElementById('iterToRun').value - 1, 1, 1000);
+		document.getElementById('iterToRun').value = Math.clamp(n0 + 1, 1, 1000);
 		for (let i = 0; i < algs.len; i++){
 			algs.passRst(i);
 			algs.scoreRst(i);
