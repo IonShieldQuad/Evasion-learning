@@ -97,7 +97,7 @@ function Network(sample, rand, inLen, outLen){
 	}*/
 	for (let i = 0; i < this.layersNum; i++){
 		this.nodes[i] = [];
-		for (let j = 0; j < (i === this.layersNum - 1 ? this.outLen : this.inLen); j++){
+		for (let j = 0; j < Math.round(this.outLen * (i / (this.layersNum - 1)) + this.inLen * (1 - (i / (this.layersNum - 1)))); j++){
 			if (i === 0){
 				this.nodes[i][j] = new Node(sample == null ? null : sample.nodes[i][j], rand, i, 'input');
 			}
@@ -861,8 +861,8 @@ function tick(q){
 			break;
 			
 			case 1:
-			if (mainArr[Math.wrap(coreIndex - 1, arrLen[1])][0].type !== 'wall'){
-				swap2d(mainArr, [coreIndex, 0], [Math.wrap(coreIndex - 1, arrLen[1]), 0]);
+			if (mainArr[Math.wrap(coreIndex - 1, arrLen[0])][0].type !== 'wall'){
+				swap2d(mainArr, [coreIndex, 0], [Math.wrap(coreIndex - 1, arrLen[0]), 0]);
 			}
 			else {
 				next = true;
@@ -870,8 +870,8 @@ function tick(q){
 			break;
 			
 			case 2:
-			if (mainArr[Math.wrap(coreIndex + 1, arrLen[1])][0].type !== 'wall'){
-				swap2d(mainArr, [coreIndex, 0], [Math.wrap(coreIndex + 1, arrLen[1]), 0]);
+			if (mainArr[Math.wrap(coreIndex + 1, arrLen[0])][0].type !== 'wall'){
+				swap2d(mainArr, [coreIndex, 0], [Math.wrap(coreIndex + 1, arrLen[0]), 0]);
 			}
 			else {
 				next = true;
@@ -995,8 +995,8 @@ function quickAlg(n){
 		quickAlgOn = !quickAlgOn;
 		currStat = 3;
 		updateStat(3);
-		var n0 = Math.clamp(document.getElementById('iterToRun').value - 1, 1, 1000);
-		document.getElementById('iterToRun').value = Math.clamp(n0 + 1, 1, 1000);
+		var n0 = Math.clamp(document.getElementById('iterToRun').value - 1, 1, 100000);
+		document.getElementById('iterToRun').value = Math.clamp(n0 + 1, 1, 100000);
 		for (let i = 0; i < algs.len; i++){
 			algs.passRst(i);
 			algs.scoreRst(i);
@@ -1016,8 +1016,11 @@ function quickAlg(n){
 		}
 		reiterate(true);
 	}
-	algs.newIter();
+	
+	alg--;
 	setIterHTML();
+	alg++;
+	algs.newIter();
 	
 	if (n !== 0){
 		if (quickAlgOn){
@@ -1032,6 +1035,8 @@ function quickAlg(n){
 		quickAlgOn = false;
 		currStat = 1;
 		updateStat(1);
+		alg = 0;
+		setIterHTML();
 	}
 }
 
