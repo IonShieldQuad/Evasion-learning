@@ -170,7 +170,7 @@ div#colorMenu {
 	position: absolute;
 	z-index: 1;
 	width: 260px;
-	height: 370px;
+	/*height: 370px;*/
 }
 
 div#colorMenu input {
@@ -231,11 +231,15 @@ div.param {
 	border-left: 8px solid #649;
 	border-radius: 2px 5px 5px 2px;
 	margin: 10px 20px 10px 0px;
-	padding: 5px;
+	padding: 3px 5px 3px 5px;
 	color: #222;
 	font-size: 16px;
 	vertical-align: middle;
-	text-align: justify;
+	text-align: left;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+	align-items: center;
 }
 
 select, input {
@@ -243,16 +247,6 @@ select, input {
 	-webkit-appearance: none;
 	appearance: none;
 	font-family: 'Trebuchet MS', sans-serif;
-}
-
-div.param select, div.param input[type = number] {
-	background-color: #ddd;
-	border: 2px solid #649;
-	border-radius: 2px;
-	margin: 0px;
-	padding: 4px;
-	color: #649;
-	font-size: 14px;
 }
 
 input.button {
@@ -269,6 +263,34 @@ input.button {
 	font-size: 30px;
 	height: 48px;
 	transition: color 0.1s, box-shadow 0.1s, border 0.1s, background-color 0.1s, font-size 0.1s;
+}
+
+div.param input[type = number] {
+	background-color: #ddd;
+	border: 2px solid #649;
+	border-radius: 2px;
+	margin: 0px;
+	padding: 4px;
+	color: #649;
+	font-size: 14px;
+	min-width: 20px;
+	min-height: 12px;
+	max-width: 80px;
+	max-height: 20px;
+}
+
+div.param select{
+	background-color: #ddd;
+	border: 2px solid #649;
+	border-radius: 2px;
+	margin: 0px;
+	padding: 4px;
+	color: #649;
+	font-size: 14px;
+	min-width: 20px;
+	min-height: 30px;
+	max-width: 80px;
+	max-height: 20px;
 }
 
 div.param select:hover, div.param input[type = number]:hover {

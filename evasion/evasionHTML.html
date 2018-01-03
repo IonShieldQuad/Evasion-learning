@@ -43,7 +43,7 @@
 		<div id="container">
 			<div id="arrBox">
 				<div class="subtitle">
-					Array
+					Settings
 				</div>
 				
 				<div class="param">
@@ -57,8 +57,42 @@
 				</div>
 				
 				<div class="param">
-					Alg num:
+					Density max:
+					<input id="densityMaxIn" type="number" name="densityMaxIn" value="0.2" step="0.01" min="0" />
+				</div>
+				
+				<div class="param">
+					Density distribution:
+					<input id="densityDistIn" type="number" name="densityDistIn" value="1.5" step="0.01" min="0" />
+				</div>
+				
+				<div class="param">
+					Algorithms in array:
 					<input id="algLen" type="number" name="algLen" value="20" step="1" min="0" />
+				</div>
+				
+				<div class="param">
+					Passes per algorithm:
+					<input id="passNumIn" type="number" name="passNumIn" value="20" step="1" min="0" />
+				</div>
+				
+				<div class="param">
+					Hidden layers:
+					<input id="layerNumIn" type="number" name="layerNumIn" value="1" step="1" min="0" />
+				</div>
+				
+				<div class="param">
+					Activation function:
+					<select id="actFuncIn" name="actFuncIn">
+						<option value="sigmoid">Sigmoid</option>
+						<option value="rectifier">Rectifier</option>
+						<option value="softplus">Softplus</option>
+					</select>
+				</div>
+				
+				<div class="param">
+					Memory nodes:
+					<input id="memNumIn" type="number" name="memNumIn" value="0" step="1" min="0" />
 				</div>
 
 				<input class="button" type="button" onclick="initGrid()" value="Ititialize" />
@@ -75,12 +109,12 @@
 				</div>
 				
 				<div class="param">
-					Alg index:
+					Algorithm index:
 					<input id="index" type="number" name="index" value="0" step="1" min="0" />
 				</div>
 				
 				<div class="param">
-					Limit:
+					Limit pass number?:
 					<input id="limit" type="checkbox" name="limit" checked />
 				</div>
 				
@@ -88,8 +122,12 @@
 				
 				<input class="button" type="button" onclick="pause()" value="Pause" />
 				
+				<div class="subtitle">
+					Learning
+				</div>
+				
 				<div class="param">
-					Run iter:
+					Iterations to run:
 					<input id="iterToRun" type="number" name="iterToRun" value="1" step="1" min="0" />
 				</div>
 				
@@ -101,11 +139,11 @@
 				Status
 				</div>
 			
-				<div id="statBar">
-				</div>
-			
 				<div id="status" class="param">
 				Idling
+				</div>
+				
+				<div id="statBar">
 				</div>
 				
 				<div id="iteration" class="param">
@@ -121,7 +159,7 @@
 				</div>
 				
 				<div id="alg" class="param">
-				Alg: 
+				Algorithm: 
 				</div>
 			</div>
 		

@@ -21,14 +21,16 @@ var maxDensity = 0.2;							//Max amount of full blocks
 var densityDist = 1.5;							//Distribution power of blocks
 var coreIndex;									//Horizontal position of core in array
 var limit = true; 								//Limit iteration number
+var calcLayers = 1;								//Number of hidden layers
+var actFunc = 'sigmoid';						//Activation function
+var memN = 0;									//Number of mamory nodes
+var passN = 20;									//Number of passes to do
 
 //Constants
-const INPUTN = 24;
+const INPUTN = 35;
 const OUTPUTN = 3;
-const SCANRAD = 2;
-const PASSN = 20;
+const SCANRAD = 3;
 const SCOREMAX = 100000;
-const CALCLAYERS = 1;
 
 //Styles
 var fStyle0 = '#444'; 		//Background
@@ -59,7 +61,20 @@ function Network(sample, rand, inLen, outLen){
 	this.nodes = [];
 	this.inLen = inLen;
 	this.outLen = outLen;
-	this.layersNum = CALCLAYERS + 2;
+	
+	try {
+		this.layersNum = sample.layersNum;
+	}
+	catch (e){
+		this.layersNum = calcLayers + 2;
+	}
+	
+	try	{
+		this.memNum = sample.memNum;
+	}
+	catch (e){
+		this.memNum = memN;
+	}
 	
 	if (sample == null || sample.iter == null){
 		this.iter = 0;
@@ -97,7 +112,7 @@ function Network(sample, rand, inLen, outLen){
 	}*/
 	for (let i = 0; i < this.layersNum; i++){
 		this.nodes[i] = [];
-		for (let j = 0; j < Math.round(this.outLen * (i / (this.layersNum - 1)) + this.inLen * (1 - (i / (this.layersNum - 1)))); j++){
+		for (let j = 0; j < Math.round((this.outLen + this.memNum) * (i / (this.layersNum - 1)) + (this.inLen + this.memNum) * (1 - (i / (this.layersNum - 1)))); j++){
 			if (i === 0){
 				this.nodes[i][j] = new Node(sample == null ? null : sample.nodes[i][j], rand, i, 'input');
 			}
@@ -149,19 +164,32 @@ function Network(sample, rand, inLen, outLen){
 		for (let j = 0; j < inLen; j++){
 			this.nodes[0][j].setVal(this.input[j]);
 		}
-		for (let i = 0; i < this.nodes.length; i++){
+		for (let i = 0; i < this.layersNum; i++){
 			let lenI = this.nodes[i].length;
 			for (let j = 0; j < lenI; j++){
 				this.nodes[i][j].calc();
 			}
 		}
+		for (let i = 0; i < this.memNum; i++){
+			let toMem = this.nodes[this.layersNum - 1][this.outLen + i].getRes();
+			this.nodes[0][this.inLen + i].setVal((toMem == null || isNaN(toMem)) ? 0 : toMem);
+		}
 		for (let j = 0; j < outLen; j++){
-			this.output[j] = this.nodes[this.nodes.length - 1][j].getRes();
+			this.output[j] = this.nodes[this.layersNum - 1][j].getRes();
 		}
 	}
 	
 	this.getOutput = function(){
 		return this.output;
+	}
+	
+	this.reset = function(){
+		for (let i = 0; i < this.layersNum; i++){
+			let lenI = this.nodes[i].length;
+			for (let j = 0; j < lenI; j++){
+				this.nodes[i][j].setVal(0);
+			}
+		}
 	}
 	
 	this.getResult = function(){
@@ -249,6 +277,10 @@ function AlgData(len){
 		this.storage[index][2] = 0;
 	}
 	
+	this.resetAlg = function(index){
+		this.storage[index][0].reset();
+	}
+	
 	this.runAlg = function(index, input){
 		let a = this.getIndex(index, 'alg');
 		
@@ -267,6 +299,15 @@ function Node(sample, rand, layer, type){
 	this.outLink = [];
 	this.val = 0;
 	this.res = 0;
+	
+	if (this.type === 'hidden'){
+		try {
+			this.actFunc = sample.actFunc;
+		}
+		catch (e){
+			this.actFunc = actFunc;
+		}
+	}
 	
 	switch (this.type){
 		case 'output':
@@ -305,7 +346,22 @@ function Node(sample, rand, layer, type){
 			for (let link of this.inLink){
 				this.val += link.getOutput();
 			}
-			this.res = (Math.random() < sigmoid(this.val) ? 1 : 0);
+			switch (this.actFunc){
+				case 'sigmoid':
+				this.res = sigmoid(this.val);
+				break;
+				
+				case 'rectifier':
+				this.res = rectifier(this.val);
+				break;
+				
+				case 'softplus':
+				this.res = softplus(this.val);
+				break;
+				
+				default:
+				this.res = this.val;
+			}
 			for (let link of this.outLink){
 				link.setInput(this.res);
 			}
@@ -372,6 +428,16 @@ function sigmoid(x){
 	return (1 / (1 + Math.exp(-x)));
 }
 
+//Rectifier function
+function rectifier(x){
+	return (x > 0 ? x : 0);
+}
+
+//Softplus function
+function softplus(x){
+	return (x > 500 ? x : (x < -500 ? 0 : (Math.log(1 + Math.exp(x)))));
+}
+
 //Updates status box
 function updateStat(key, str){
 	var statBar = document.getElementById('statBar');
@@ -385,7 +451,7 @@ function updateStat(key, str){
 	if (key !== 3){
 		animOffset = -1;
 		clearInterval(animHdl);
-		tickHdl = null;
+		animHdl = null;
 	}
 	switch (key){
 		case 0:
@@ -406,8 +472,10 @@ function updateStat(key, str){
 		case 3:
 		statBar.style.background = ('linear-gradient(to right, '+ barStyle3 +'0%,'+ barStyle4 +'50%,'+ barStyle3 +'100%)');
 		statText.innerHTML = 'Working';
-		animHdl = setInterval(function(){animTick(statBar, barStyle3, barStyle4)}, 20);
-		animOffset = 0;
+		if (animHdl == null){
+			animHdl = setInterval(function(){animTick(statBar, barStyle3, barStyle4)}, 20);
+			animOffset = 0;
+		}
 		break;
 		
 		case 4:
@@ -435,7 +503,7 @@ function setIterHTML(){
 	document.getElementById('iteration').innerHTML = (`Iteration: ${algs.iter == null ? 'Invalid' : algs.iter}`);
 	document.getElementById('pass').innerHTML = (`Pass: ${algs.getIndex(alg, 'pass') == null ? 'Invalid' : algs.getIndex(alg, 'pass')}`);
 	document.getElementById('score').innerHTML = (`Score: ${algs.getIndex(alg, 'score') == null ? 'Invalid' : algs.getIndex(alg, 'score')}`);
-	document.getElementById('alg').innerHTML = (`Alg: ${alg == null ? 'Invalid' : alg} from [0 - ${algs.len == null ? 'Invalid' : algs.len - 1}]`);
+	document.getElementById('alg').innerHTML = (`Algorithm: ${alg == null ? 'Invalid' : alg} from [0 - ${algs.len == null ? 'Invalid' : algs.len - 1}]`);
 }
 
 //Gets random int from range
@@ -537,6 +605,17 @@ function initGrid(){
 	document.getElementById('arrLenY').value = arrLen[1];
 	algLen = Math.max(document.getElementById('algLen').value, 0);
 	document.getElementById('algLen').value = algLen;
+	maxDensity = Math.clamp(parseFloat(document.getElementById('densityMaxIn').value), 0, 1);
+	document.getElementById('densityMaxIn').value = maxDensity;
+	densityDist = parseFloat(document.getElementById('densityDistIn').value);
+	document.getElementById('densityDistIn').value = densityDist;
+	passN = Math.clamp(parseInt(document.getElementById('passNumIn').value), 0, 1000);
+	document.getElementById('passNumIn').value = passN;
+	calcLayers = Math.clamp(parseInt(document.getElementById('layerNumIn').value), 0, 1000);
+	document.getElementById('layerNumIn').value = calcLayers;
+	memN = Math.clamp(parseInt(document.getElementById('memNumIn').value), 0, 1000);
+	document.getElementById('memNumIn').value = memN;
+	actFunc = document.getElementById('actFuncIn').value;
 	
 	
 	for (let i = 0; i < arrLen[0]; i++){
@@ -782,6 +861,7 @@ function toggle(){
 			limit = document.getElementById('limit').checked;
 			
 			paused = false;
+			algs.resetAlg(alg);
 			algs.passRst(alg);
 			algs.scoreRst(alg);
 			removeWalls();
@@ -961,12 +1041,13 @@ function finishIter(code){
 function reiterate(q){
 	removeWalls();
 	algs.passInc(alg);
-	if (algs.getIndex(alg, 'pass') >= PASSN && q){
+	if (algs.getIndex(alg, 'pass') >= passN && q){
 		alg++;
 	}
 	if (!q){
-		if (!(limit && algs.getIndex(alg, 'pass') >= PASSN)){
+		if (!(limit && algs.getIndex(alg, 'pass') >= passN)){
 			setIterHTML();
+			algs.resetAlg(alg);
 			ticking = true;
 			tickHdl = setTimeout(function(){tick();}, delay);
 		}
@@ -1014,6 +1095,7 @@ function quickAlg(n){
 		if (!quickAlgOn){
 			break;
 		}
+		algs.resetAlg(alg);
 		reiterate(true);
 	}
 	
