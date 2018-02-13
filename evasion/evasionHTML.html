@@ -72,6 +72,11 @@
 				</div>
 				
 				<div class="param">
+					Learning rate:
+					<input id="LRateIn" type="number" name="LRateIn" value="0.010" step="0.0001" min="0" />
+				</div>
+				
+				<div class="param">
 					Passes per algorithm:
 					<input id="passNumIn" type="number" name="passNumIn" value="20" step="1" min="0" />
 				</div>
@@ -85,8 +90,17 @@
 					Activation function:
 					<select id="actFuncIn" name="actFuncIn">
 						<option value="sigmoid">Sigmoid</option>
-						<option value="rectifier">Rectifier</option>
+						<option value="ReLU">ReLU</option>
+						<option value="LReLU">LReLU</option>
 						<option value="softplus">Softplus</option>
+					</select>
+				</div>
+				
+				<div class="param">
+					Learning mode:
+					<select id="learnModeIn" name="learnModeIn">
+					<option value="evolution">Evolution</option>
+						<option value="backprop">Backprop</option>
 					</select>
 				</div>
 				
@@ -139,8 +153,10 @@
 				Status
 				</div>
 			
-				<div id="status" class="param">
-				Idling
+				<div class="param">
+					<div id="status" class="display">
+					Idling
+					</div>
 				</div>
 				
 				<div id="statBar">
